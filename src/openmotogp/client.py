@@ -23,7 +23,7 @@ class MotoGPClient:
         async with httpx.AsyncClient(headers=self.headers) as client:
             response = await client.get(
                 f"{BASE_URL}/results/events",
-                params={"seasonUuid": season_uuid, "isFinished": "false"}
+                params={"seasonUuid": season_uuid}
             )
             response.raise_for_status()
             return [Event(**event) for event in response.json()]

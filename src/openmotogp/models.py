@@ -16,7 +16,8 @@ class Season(BaseModel):
     current: bool
 
 class Event(BaseModel):
-    id: str = Field(alias="toad_api_uuid")
+    id: str
+    toad_api_uuid: Optional[str] = None
     short_name: str = Field(alias = "sponsored_name")
     country: Country
     circuit: Circuit
@@ -26,7 +27,7 @@ class Event(BaseModel):
 class Category(BaseModel):
     id: str
     name: str
-    legacy_id: str
+    legacy_id: Optional[int] = None
 
 class SessionSummary(BaseModel):
     id: str

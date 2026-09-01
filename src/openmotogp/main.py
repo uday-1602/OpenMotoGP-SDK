@@ -1,24 +1,22 @@
-from openmotogp.core import OpenMotoGP
+import openmotogp as mgp
 import pandas as pd
 
 def main():
-    print("Initializing OpenMotoGP SDK...")
-    api = OpenMotoGP()
+    api = mgp.OpenMotoGP()
     
-    print("Fetching 2024 MotoGP calendar...")
-    try:
-        schedule_df = api.get_schedule(year=2024)
-        
-        # Format pandas output so it doesn't truncate in the terminal
-        pd.set_option('display.max_columns', None)
-        pd.set_option('display.width', 1000)
-        
-        print("\n--- MotoGP Schedule ---")
-        print(schedule_df.head())
-        print("\nSuccess! The SDK is communicating with the MotoGP API.")
-        
-    except Exception as e:
-        print(f"\nError: {e}")
+    # 1-liner to fetch race results without dealing with UUIDs
+    print("Fetching 2026 Aragon MotoGP Race Results...")
+    results_df = api.get_results(
+        year=2026,
+        event_name="Aragon",
+        session_type="Sprint",
+        category="MotoGP"
+    )
+
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', 1000)
+    print("\n--- Race Results ---")
+    print(results_df[['Position', 'Rider', 'Team', 'Time / Gap', 'Points']])
 
 if __name__ == "__main__":
     main()
