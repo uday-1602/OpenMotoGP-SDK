@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MotoGP Live Telemetry</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #fff; padding: 20px; }
+        #status { padding: 10px; margin-bottom: 20px; border-radius: 5px; background: #333; }
+        .connected { border-left: 5px solid #00ff00; }
+        .disconnected { border-left: 5px solid #ff0000; }
+        pre { background: #1e1e1e; padding: 15px; height: 70vh; overflow-y: auto; border: 1px solid #444; }
+    </style>
+</head>
+<body>
+    <h2>🏎️ OpenMotoGP Live Stream</h2>
+    <div id="status" class="disconnected">Waiting for connection...</div>
+    <pre id="data-feed">Incoming JSON payloads will appear here...</pre>
+
+    <script>
+        // Connect to your local FastAPI server
+        const ws = new WebSocket("ws://localhost:8000/ws/telemetry");
+        const statusBox = document.getElementById("status");
+        const dataFeed = document.getElementById("data-feed");
+
+        ws.onopen = () => {
+            statusBox.textContent = "Status: Connected to local server ✅";
+            statusBox.className = "connected";
+        };
+
+        ws.onmessage = (event) => {
+            // Parse the incoming string into a JSON object, then format it nicely
+            const telemetry = JSON.parse(event.data);
+            const prettyJson = JSON.stringify(telemetry, null, 2);
+            
+            // Push the newest data to the top of the screen
+            dataFeed.textContent = prettyJson + "\n\n-----------------\n\n" + dataFeed.textContent;
+        };
+
+        ws.onclose = () => {
+            statusBox.textContent = "Status: Disconnected ❌";
+            statusBox.className = "disconnected";
+        };
+    </script>
+</body>
+</html>
