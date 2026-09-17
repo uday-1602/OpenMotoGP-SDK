@@ -1,0 +1,79 @@
+/* ══════════════════════════════════════════════════════════
+   OpenMotoGP Live — Main CSS
+   All custom styles. Tailwind utility classes live in index.html.
+   ══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&family=Sora:wght@700;800&display=swap');
+
+/* ── Base ──────────────────────────────────────────────── */
+body {
+    background-color: #080808;
+    background-image: radial-gradient(circle at 15% 50%, rgba(229, 0, 20, 0.05), transparent 25%),
+                      radial-gradient(circle at 85% 30%, rgba(0, 238, 252, 0.05), transparent 25%);
+    background-attachment: fixed;
+    color: #e5e2e1;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Custom Scrollbar ──────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ── 2026 Spatial Glass panel (frosted-glass) ──────────── */
+.glass-panel {
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.6), rgba(10, 10, 10, 0.8));
+    backdrop-filter: blur(24px) saturate(120%);
+    -webkit-backdrop-filter: blur(24px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+}
+
+/* ── Live status pulse dot ─────────────────────────────── */
+.pulse-dot {
+    animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pulse {
+    0%   { transform: scale(0.9); box-shadow: 0 0 0 0  rgba(0, 255, 0, 0.4); }
+    70%  { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(0, 255, 0, 0);   }
+    100% { transform: scale(0.9); box-shadow: 0 0 0 0  rgba(0, 255, 0, 0);   }
+}
+
+/* ── Leaderboard row hover ─────────────────────────────── */
+.table-row-hover:hover {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05), transparent);
+    /* border-left is handled dynamically in JS now */
+}
+
+/* ── Thin progress data strip ──────────────────────────── */
+.data-strip {
+    height: 4px;
+    background-color: #353534;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.data-strip-fill {
+    height: 100%;
+    background-color: #00eefc;
+}
+
+/* ── Critical state border glow ────────────────────────── */
+.border-glow-critical {
+    border: 1px solid rgba(229, 0, 20, 0.5);
+    box-shadow: 0 0 10px rgba(229, 0, 20, 0.2);
+}

@@ -1,45 +1,249 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>MotoGP Live Telemetry</title>
-    <style>
-        body { font-family: sans-serif; background: #121212; color: #fff; padding: 20px; }
-        #status { padding: 10px; margin-bottom: 20px; border-radius: 5px; background: #333; }
-        .connected { border-left: 5px solid #00ff00; }
-        .disconnected { border-left: 5px solid #ff0000; }
-        pre { background: #1e1e1e; padding: 15px; height: 70vh; overflow-y: auto; border: 1px solid #444; }
-    </style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OpenMotoGP Live Telemetry</title>
+
+  <!-- Tailwind CDN (dev only) -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Material Symbols icon font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"/>
+
+  <!-- Futuristic Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind theme config (colour tokens, type scale, spacing) -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-primary-fixed-variant":   "#930008",
+            "on-primary-fixed":           "#410001",
+            "tertiary-container":         "#707272",
+            "tertiary-fixed-dim":         "#c6c6c7",
+            "on-error-container":         "#ffdad6",
+            "background":                 "#131313",
+            "surface-tint":               "#ffb4aa",
+            "tertiary-fixed":             "#e2e2e2",
+            "on-background":              "#e5e2e1",
+            "secondary-fixed-dim":        "#00dbe9",
+            "on-tertiary-fixed":          "#1a1c1c",
+            "surface-container":          "#201f1f",
+            "inverse-on-surface":         "#313030",
+            "primary-fixed":              "#ffdad5",
+            "surface-dim":                "#131313",
+            "on-tertiary-fixed-variant":  "#454747",
+            "inverse-surface":            "#e5e2e1",
+            "surface":                    "#131313",
+            "on-secondary-fixed-variant": "#004f54",
+            "on-error":                   "#690005",
+            "on-surface":                 "#e5e2e1",
+            "secondary-container":        "#00eefc",
+            "on-tertiary-container":      "#f8f8f8",
+            "surface-variant":            "#353534",
+            "surface-container-low":      "#1c1b1b",
+            "error-container":            "#93000a",
+            "surface-bright":             "#3a3939",
+            "primary-container":          "#e50014",
+            "error":                      "#ffb4ab",
+            "tertiary":                   "#c6c6c7",
+            "surface-container-lowest":   "#0e0e0e",
+            "secondary-fixed":            "#7df4ff",
+            "surface-container-high":     "#2a2a2a",
+            "surface-container-highest":  "#353534",
+            "inverse-primary":            "#c0000f",
+            "on-secondary":               "#00363a",
+            "outline-variant":            "#5e3f3b",
+            "on-tertiary":                "#2f3131",
+            "on-surface-variant":         "#e9bcb6",
+            "on-primary-container":       "#fff6f5",
+            "outline":                    "#af8782",
+            "secondary":                  "#d3fbff",
+            "primary-fixed-dim":          "#ffb4aa",
+            "on-secondary-container":     "#00686f",
+            "on-secondary-fixed":         "#002022",
+            "on-primary":                 "#690004",
+            "primary":                    "#ffb4aa",
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg:      "0.5rem",
+            xl:      "0.75rem",
+            full:    "9999px",
+          },
+          spacing: {
+            "container-max": "1440px",
+            "unit":          "4px",
+            "margin-safe":   "32px",
+            "gutter":        "16px",
+          },
+          fontFamily: {
+            "data-lg":            ["JetBrains Mono"],
+            "display-hero":       ["Sora"],
+            "data-md":            ["JetBrains Mono"],
+            "headline-lg":        ["Sora"],
+            "headline-lg-mobile": ["Sora"],
+            "body-md":            ["Hanken Grotesk"],
+            "label-caps":         ["JetBrains Mono"],
+          },
+          fontSize: {
+            "data-lg":            ["48px", { lineHeight: "1",   letterSpacing: "-0.02em", fontWeight: "700" }],
+            "display-hero":       ["72px", { lineHeight: "1.1", letterSpacing: "-0.04em", fontWeight: "800" }],
+            "data-md":            ["18px", { lineHeight: "1.4", fontWeight: "500" }],
+            "headline-lg":        ["32px", { lineHeight: "1.2", fontWeight: "700" }],
+            "headline-lg-mobile": ["24px", { lineHeight: "1.2", fontWeight: "700" }],
+            "body-md":            ["16px", { lineHeight: "1.6", fontWeight: "400" }],
+            "label-caps":         ["12px", { lineHeight: "1",   letterSpacing: "0.1em",   fontWeight: "600" }],
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="static/css/main.css"/>
 </head>
-<body>
-    <h2>🏎️ OpenMotoGP Live Stream</h2>
-    <div id="status" class="disconnected">Waiting for connection...</div>
-    <pre id="data-feed">Incoming JSON payloads will appear here...</pre>
 
-    <script>
-        // Connect to your local FastAPI server
-        const ws = new WebSocket("ws://localhost:8000/ws/telemetry");
-        const statusBox = document.getElementById("status");
-        const dataFeed = document.getElementById("data-feed");
+<body class="h-screen w-screen flex flex-col font-body-md text-body-md relative">
 
-        ws.onopen = () => {
-            statusBox.textContent = "Status: Connected to local server ✅";
-            statusBox.className = "connected";
-        };
+  <!-- ── Background WebGL Shader ─────────────────────────── -->
+  <div class="absolute inset-0 z-0">
+    <div class="w-full h-full" style="display:block;">
+      <canvas id="shader-canvas-ANIMATION_5" style="display:block;width:100%;height:100%"></canvas>
+    </div>
+  </div>
 
-        ws.onmessage = (event) => {
-            // Parse the incoming string into a JSON object, then format it nicely
-            const telemetry = JSON.parse(event.data);
-            const prettyJson = JSON.stringify(telemetry, null, 2);
-            
-            // Push the newest data to the top of the screen
-            dataFeed.textContent = prettyJson + "\n\n-----------------\n\n" + dataFeed.textContent;
-        };
+  <!-- ── UI Layer ─────────────────────────────────────────── -->
+  <div class="relative z-10 flex flex-col h-full w-full pointer-events-none p-margin-safe gap-gutter">
 
-        ws.onclose = () => {
-            statusBox.textContent = "Status: Disconnected ❌";
-            statusBox.className = "disconnected";
-        };
-    </script>
+    <!-- Top Header (Floating Glass Pill) -->
+    <header class="pointer-events-auto flex justify-center w-full mt-4">
+      <div class="bg-surface/40 backdrop-blur-md border border-white/10 rounded-full px-8 py-3 flex items-center gap-6 shadow-[0_0_20px_rgba(229,0,20,0.1)]">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-yellow-400 pulse-dot"></span>
+          <span class="font-headline-lg text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary-container tracking-tighter italic">OpenMotoGP Live</span>
+        </div>
+        <div class="w-px h-6 bg-white/20"></div>
+        <div class="font-label-caps text-label-caps text-on-surface">CONNECTING…</div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex gap-gutter overflow-hidden mt-4">
+
+      <!-- Left Column: Leaderboard -->
+      <section class="pointer-events-auto w-[40%] min-w-[550px] h-full flex flex-col glass-panel rounded-lg overflow-hidden border-glow-critical border-opacity-50">
+        <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center bg-surface-container-high/50">
+          <h2 class="font-label-caps text-label-caps text-on-surface">LEADERBOARD</h2>
+          <span class="font-label-caps text-label-caps text-secondary-container">L —/—</span>
+        </div>
+        <div class="flex-1 overflow-auto">
+          <table class="w-full text-left" id="leaderboard-table">
+            <thead class="font-label-caps text-label-caps text-tertiary-container sticky top-0 bg-surface/90 backdrop-blur-md z-20">
+              <tr>
+                <th class="py-3 px-4 font-normal">POS</th>
+                <th class="py-3 px-2 font-normal">#</th>
+                <th class="py-3 px-4 font-normal">RIDER</th>
+                <th class="py-3 px-4 text-right font-normal">GAP</th>
+                <th class="py-3 px-4 text-center font-normal">TYRES</th>
+              </tr>
+            </thead>
+            <tbody class="font-data-md text-data-md text-on-surface">
+              <!-- Populated by leaderboard.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Center Stage: Circuit Map -->
+      <section class="pointer-events-auto flex-1 h-full glass-panel rounded-lg flex flex-col relative overflow-hidden">
+        <!-- Circuit info bar -->
+        <div class="px-6 py-3 border-b border-white/10 flex justify-between items-center bg-surface-container-high/50">
+          <div class="flex items-center gap-4">
+            <span class="font-label-caps text-label-caps text-tertiary-container" id="circuit-display-name">LOADING CIRCUIT…</span>
+            <!-- Live Broadcast Sync Control -->
+            <div id="broadcast-sync-widget" class="pointer-events-auto flex items-center gap-1.5 bg-surface/80 border border-white/10 rounded-full px-2.5 py-1 text-xs shadow-md z-30">
+              <span class="text-tertiary text-[10px] font-mono uppercase tracking-wider select-none">TV SYNC:</span>
+              <button type="button" id="btn-sync-sub-5" onclick="window.Animator && window.Animator.adjustSyncOffset(-5)" class="cursor-pointer px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 active:scale-95 text-[11px] font-mono text-white transition-all select-none" title="Delay 5 seconds">-5s</button>
+              <button type="button" id="btn-sync-sub-1" onclick="window.Animator && window.Animator.adjustSyncOffset(-1)" class="cursor-pointer px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 active:scale-95 text-[11px] font-mono text-white transition-all select-none" title="Delay 1 second">-1s</button>
+              <span id="sync-offset-display" class="font-mono text-[11px] text-primary-container px-1 font-bold min-w-[36px] text-center select-none">0.0s</span>
+              <button type="button" id="btn-sync-add-1" onclick="window.Animator && window.Animator.adjustSyncOffset(1)" class="cursor-pointer px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 active:scale-95 text-[11px] font-mono text-white transition-all select-none" title="Advance 1 second">+1s</button>
+              <button type="button" id="btn-sync-add-5" onclick="window.Animator && window.Animator.adjustSyncOffset(5)" class="cursor-pointer px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 active:scale-95 text-[11px] font-mono text-white transition-all select-none" title="Advance 5 seconds">+5s</button>
+              <button type="button" id="btn-sync-t10"   onclick="window.Animator && window.Animator.syncToTurn(10)" class="cursor-pointer px-2 py-0.5 rounded bg-primary-container/20 hover:bg-primary-container/40 active:scale-95 text-[10px] font-mono text-primary-container transition-all select-none font-bold" title="Align dots directly to Turn 10">T10</button>
+              <button type="button" id="btn-sync-reset" onclick="window.Animator && window.Animator.resetSyncOffset()" class="cursor-pointer px-1.5 py-0.5 rounded text-[10px] text-tertiary hover:text-white active:scale-95 transition-all select-none" title="Reset offset to 0">RST</button>
+            </div>
+          </div>
+          <span id="session-status-badge" class="font-label-caps text-label-caps text-xs px-2 py-1 rounded bg-primary-container/20 text-primary-container">LIVE</span>
+        </div>
+        <!-- Map viewport -->
+        <div class="flex-1 relative flex items-center justify-center">
+          
+          <!-- Original SVG from user serves as the perfect background -->
+          <img id="circuit-bg-img" class="absolute w-[140%] h-[140%] object-contain origin-center hidden z-0" src="" alt="Circuit Background">
+          
+          <!-- Dynamic SVG layer for Rider dots perfectly overlaid -->
+          <svg id="circuit-svg" class="absolute w-[140%] h-[140%] origin-center z-10" viewBox="0 0 1080 1080" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <filter id="rider-glow" x="-80%" y="-80%" width="260%" height="260%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <!-- Invisible track path just for math calculations (getPointAtLength) -->
+            <path id="track-path" fill="none" stroke="none" opacity="0"/>
+            <!-- Rider dots (populated by animator.js) -->
+            <g id="rider-layer"/>
+          </svg>
+          
+          <!-- Top-right weather widget (moved inside circuit panel) -->
+          <div class="pointer-events-auto absolute top-4 right-4">
+            <div class="glass-panel rounded-lg px-6 py-4 flex items-center gap-6 shadow-lg">
+              <div class="flex flex-col">
+                <span class="font-label-caps text-label-caps text-tertiary-container mb-1">TRACK TEMP</span>
+                <div class="flex items-baseline gap-1">
+                  <span class="font-data-lg text-data-lg text-on-surface text-[32px]" id="track-temp">—</span>
+                  <span class="font-data-md text-data-md text-tertiary">°C</span>
+                </div>
+              </div>
+              <div class="w-px h-10 bg-white/10"></div>
+              <div class="flex flex-col">
+                <span class="font-label-caps text-label-caps text-tertiary-container mb-1">HUMIDITY</span>
+                <div class="flex items-baseline gap-1">
+                  <span class="font-data-lg text-data-lg text-on-surface text-[32px]" id="humidity">—</span>
+                  <span class="font-data-md text-data-md text-tertiary">%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fallback if no circuit is registered -->
+          <div id="no-circuit-msg" class="hidden absolute inset-0 flex items-center justify-center">
+            <p class="font-label-caps text-label-caps text-tertiary text-center opacity-50">No circuit map available<br><span class="text-[10px]">ARA · THA supported</span></p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div><!-- /.z-10 UI layer -->
+
+  <!-- ════════════════════════════════════════════════════
+       Scripts — load order matters:
+         1. shader.js   (WebGL background, no deps)
+         2. circuit.js  (CircuitLoader module, no deps)
+         3. animator.js (Animator module, depends on CircuitLoader)
+         4. leaderboard.js (Leaderboard module, no deps)
+         5. websocket.js  (WS manager, depends on all above)
+       ════════════════════════════════════════════════════ -->
+  <script src="static/js/shader.js"></script>
+  <script src="static/js/circuit.js"></script>
+  <script src="static/js/animator.js"></script>
+  <script src="static/js/leaderboard.js"></script>
+  <script src="static/js/websocket.js"></script>
+
 </body>
 </html>
